@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: white;
+    background-color: black;
+}
+
+header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    text-align: left;
+}
+
+.logo h1 {
+    font-size: 24px;
+    color: #ff4040;
+    font-weight: bold;
+    margin: 0;
+}
+
+.logo h1 a {
+    color: #ff4040;
+    text-decoration: none;
+}
+
+.logo h1 a:hover {
+    color: #ff6666;
+}
+
+nav {
+    text-align: center;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+nav ul li a:hover {
+    color: #ccc;
+}
+
+nav ul li a.active {
+    color: #ff4040;
+    font-weight: bold;
+}
+
+.social-icons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.social-icons a img {
+    width: 20px;
+    height: 20px;
+    filter: invert(1);
+}
+
+main {
+    padding-top: 80px;
+}
+
+.archive-page {
+    padding: 50px;
+}
+
+.archive-page h1 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    color: #ff4040;
+    text-align: center;
+}
+
+/* Masonry layout using column-count */
+.archive-grid {
+    column-count: 4; /* Number of columns */
+    column-gap: 5px; /* Minimal gap between columns */
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px; /* Optional: Limit the grid width */
+}
+
+/* Style images and videos */
+.archive-grid img,
+.archive-grid video {
+    width: 100%;
+    height: auto;
+    min-height: 200px; /* Ensure tiles don't shrink too much */
+    object-fit: cover; /* Fill the space, cropping if needed */
+    border-radius: 10px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    background-color: #ddd;
+    margin-bottom: 5px; /* Minimal vertical gap */
+    display: block;
+    break-inside: avoid; /* Prevent items from breaking across columns */
+}
+
+/* Optional: Style videos */
+.archive-grid video {
+    outline: none;
+    object-fit: contain; /* Ensure videos are fully visible */
+}
+
+/* Hover effects */
+.archive-grid img:hover,
+.archive-grid video:hover {
+    opacity: 0.5;
+    transform: scale(1.03);
+}
+
+/* Responsive columns */
+@media (max-width: 1200px) {
+    .archive-grid {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 800px) {
+    .archive-grid {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 500px) {
+    .archive-grid {
+        column-count: 1;
+    }
+}
