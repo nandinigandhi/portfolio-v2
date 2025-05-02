@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seeing Sound</title>
+    <link rel="icon" type="image/x-icon" href="favicon.jpg">
+
+    <style>
+        body {
+        background-color: black;
+        margin: 0;
+    }
+
+    canvas {
+        display: block;
+        margin: 0 auto;
+        background-color: black;
+    }
+        #controls {
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button id="startButton">Start Listening</button>
+        <button id="stopButton" style="display: none;">Stop Listening</button>
+    </div>
+    <canvas id="synesthesiaCanvas" width="800" height="800"></canvas>
+
+    <script>
+        // Get the canvas and context
+        const canvas = document.getElementById('synesthesiaCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Define colors based on your image (RGB values approximated)
+        const COLORS = {
+            'C': 'rgb(255, 0, 0)',    // Red
+            'C#': 'rgb(128, 0, 128)',  // Purple
+            'D': 'rgb(255, 255, 0)',   // Yellow
+            'D#': 'rgb(255, 192, 203)', // Pink
+            'E': 'rgb(173, 216, 230)',  // Light Blue
+            'F': 'rgb(128, 0, 0)',      // Maroon
+            'F#': 'rgb(0, 0, 255)',     // Blue
+            'G': 'rgb(255, 165, 0)',    // Orange
+            'G#': 'rgb(128, 0, 128)',   // Purple (same as C# for simplicity)
+            'A': 'rgb(0, 255, 0)',      // Green
+            'A#': 'rgb(165, 42, 42)',   // Brown
+            'B': 'rgb(173, 216, 230)'   // Light Blue (same as E for simplicity)
+        };
+
+        let audioContext, analyser, microphone, source, isListening = false;
+
+        // Function to initialize audio context and microphone
+        async function startListening() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048; // Size for frequency analysis
+
+                // Get microphone input
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                microphone = audioContext.createMediaStreamSource(stream);
+                microphone.connect(analyser);
+
+                isListening = true;
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('stopButton').style.display = 'inline';
+                animate(); // Start the animation loop
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Microphone access denied or error occurred. Please ensure you allow microphone access.');
+            }
+        }
+
+        // Function to stop listening
+        function stopListening() {
+            if (microphone) {
+                microphone.disconnect();
+                analyser.disconnect();
+                audioContext.close();
+            }
+            isListening = false;
+            document.getElementById('startButton').style.display = 'inline';
+            document.getElementById('stopButton').style.display = 'none';
+        }
+
+        // Function to detect the dominant note from audio frequency data
+        function detectNote() {
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            // Find the frequency with the highest amplitude
+            let maxAmplitude = -Infinity;
+            let dominantFreq = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                if (dataArray[i] > maxAmplitude) {
+                    maxAmplitude = dataArray[i];
+                    dominantFreq = i * audioContext.sampleRate / analyser.fftSize;
+                }
+            }
+
+            // Map frequency to musical note (simplified for common pitches, e.g., middle C to B)
+            // Note frequencies (Hz) for A4 = 440 Hz as reference
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const A4 = 440; // A4 frequency
+            const octave = Math.floor(Math.log2(dominantFreq / A4) + 4); // Estimate octave (simplified)
+            const noteIndex = Math.round(12 * (Math.log2(dominantFreq / (A4 * Math.pow(2, octave - 4))))) % 12;
+
+            if (noteIndex >= 0 && noteIndex < 12 && dominantFreq > 100) { // Filter out very low frequencies
+                return notes[noteIndex];
+            }
+            return 'D'; // Default to D (yellow) if no clear note detected
+        }
+
+        // Main animation loop
+        function animate() {
+            if (isListening) {
+                // Detect the note
+                const note = detectNote();
+
+                // Set canvas background color based on the detected note
+                if (note in COLORS) {
+                    ctx.fillStyle = COLORS[note];
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                requestAnimationFrame(animate);
+            }
+        }
+
+        // Event listeners for buttons
+        document.getElementById('startButton').addEventListener('click', startListening);
+        document.getElementById('stopButton').addEventListener('click', stopListening);
+    </script>
+</body>
+</html>
